@@ -1,8 +1,8 @@
 ---
-# APImon Database related steps
+# Database related steps
 #
 
-- name: Create apimon DB
+- name: Create Influx DB
   influxdb_database:
     hostname: "{{ influxdb_hostname }}"
     username: "{{ influxdb_admin_user_name }}"

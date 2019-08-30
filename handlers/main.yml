@@ -15,4 +15,3 @@
   systemd:
     name: "{{ service_name }}"
     state: "restarted"
-

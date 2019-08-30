@@ -70,5 +70,4 @@
     permanent: yes
     immediate: yes
 
-- include_tasks: apimon_db.yaml
-
+- include_tasks: db.yaml

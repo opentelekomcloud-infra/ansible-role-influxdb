@@ -1,4 +1,5 @@
 galaxy_info:
+  role_name: influxdb
   author: Artem Goncharov
   description: Provision InfluxDB in the podman container
   company: OpenTelekomCloud
@@ -12,6 +13,6 @@ galaxy_info:
     versions:
     - all
 
-  galaxy_tags: [InfluxDB, podman]
+  galaxy_tags: [influxdb, podman]
 
 dependencies: []
