@@ -22,11 +22,11 @@
     dest: "{{ ( '/etc/ssl/' + item.name ) }}"
     mode: "{{ item.mode }}"
   loop:
-    - {content: "{{influxdb_ssl_cert_content}}",
-       name: "{{influxdb_ssl_cert_name}}",
+    - {content: "{{ influxdb_ssl_cert_content }}",
+       name: "{{ influxdb_ssl_cert_name }}",
        mode: "0644"}
-    - {content: "{{influxdb_ssl_key_content}}",
-       name: "{{influxdb_ssl_key_name}}",
+    - {content: "{{ influxdb_ssl_key_content }}",
+       name: "{{ influxdb_ssl_key_name }}",
        mode: "0600"}
 
 - name: Make sure InfluxDB Conf dir exists
