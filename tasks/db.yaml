@@ -14,4 +14,3 @@
     # "{{ apimon_ssl_validate_cert }}" 
 
     state: present
-

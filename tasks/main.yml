@@ -50,7 +50,7 @@
 
 - name: Initialize InfluxDB
   become: true
-  command: "/usr/bin/podman run --env-file /etc/influxdb/env -v /var/lib/influxdb:/var/lib/influxdb:Z influxdb:{{influxdb_image_tag}} /init-influxdb.sh"
+  command: "/usr/bin/podman run --env-file /etc/influxdb/env -v /var/lib/influxdb:/var/lib/influxdb:Z influxdb:{{ influxdb_image_tag }} /init-influxdb.sh"
   args:
     creates: /var/lib/influxdb/data
 
