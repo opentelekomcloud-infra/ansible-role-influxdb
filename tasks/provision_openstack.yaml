@@ -1,0 +1,60 @@
+---
+# tasks file for infra_xxx
+
+- when: influxdb_host_state != 'absent'
+  block:
+
+    - name: Create server {{ influxdb_host_server_name }}
+      os_server:
+        state: "{{ influxdb_host_state }}"
+        name: "{{ influxdb_host_server_name }}"
+        image: "{{ influxdb_host_image }}"
+        flavor: "{{ influxdb_host_flavor }}"
+        key_name: "{{ influxdb_host_key_name }}"
+        boot_from_volume: true
+        auto_ip: "{{ influxdb_host_auto_ip }}"
+        meta: "{{ influxdb_host_metadata }}"
+        availability_zone: "{{ influxdb_host_availability_zone }}"
+        security_groups: "{{ influxdb_host_security_groups }}"
+        nics: "{{ influxdb_host_network }}"
+        volume_size: "{{ influxdb_host_root_volume_size }}"
+        userdata: |
+          #cloud-config
+          fqdn: {{ influxdb_host_server_fqdn }}
+          packages:
+          growpart:
+          mode: auto
+          devices: ['/']
+          ignore_growroot_disabled: false
+      register: server
+    
+    - name: Create Data Volume {{ influxdb_host_data_volume_name }}
+      os_volume:
+        state: "{{ influxdb_host_state }}"
+        name: "{{ influxdb_host_data_volume_name }}"
+        size: "{{ influxdb_host_data_volume_size }}"
+        volume_type: "{{ influxdb_host_data_volume_type }}"
+        availability_zone: "{{ influxdb_host_availability_zone }}"
+        metadata: "{{ influxdb_host_data_volume_metadata }}"
+      when: influxdb_host_data_volume_size is defined
+      register: data_volume
+    
+    - name: Attach Data Volume {{ influxdb_host_data_volume_name }}
+      os_server_volume:
+        state: present
+        server: "{{ server.id }}"
+        volume: "{{ data_volume.id }}"
+      when: data_volume.id is defined
+
+- when: influxdb_host_state == 'absent'
+  block:
+
+    - name: Delete host
+      os_server:
+        state: absent
+        name: "{{ influxdb_host_server_name }}"
+
+    - name: Delete volume
+      os_volume:
+        state: absent
+        name: "{{ influxdb_host_data_volume_name }}"

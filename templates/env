@@ -1,0 +1,9 @@
+INFLUXDB_IMAGE=influxdb:{{ influxdb_image_tag }}
+INFLUXDB_ADMIN_USER={{ influxdb_admin_user_name }}
+INFLUXDB_ADMIN_PASSWORD={{ influxdb_admin_user_password }}
+INFLUXDB_HTTP_AUTH_ENABLED=true
+INFLUXDB_HTTP_HTTPS_ENABLED=true
+INFLUXDB_HTTP_HTTPS_CERTIFICATE=/etc/ssl/influxdb.crt
+INFLUXDB_HTTP_HTTPS_PRIVATE_KEY=/etc/ssl/influxdb.key
+# Caution, this might potentially cause breaking of the DS if new value generated
+INFLUXDB_HTTP_SHARED_SECRET={{lookup('password', '/dev/null length=15 chars=ascii_letters')}}

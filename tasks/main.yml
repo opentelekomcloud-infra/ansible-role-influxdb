@@ -1,0 +1,74 @@
+---
+# tasks file for roles/influxdb
+# TODO(gtema) think about running influx container as influx user similar
+# to Grafana
+
+- name: Install python-influxdb package
+  become: true
+  package:
+    name: python3-influxdb
+    state: present
+
+- name: Write influxdb systemd unit file
+  become: true
+  template:
+    dest: "{{ influxdb_systemd_unit_path }}"
+    src: influxdb-service.service
+
+- name: Write SSL Cert
+  become: true
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ ( '/etc/ssl/' + item.name ) }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - {content: "{{influxdb_ssl_cert_content}}",
+       name: "{{influxdb_ssl_cert_name}}",
+       mode: "0644"}
+    - {content: "{{influxdb_ssl_key_content}}",
+       name: "{{influxdb_ssl_key_name}}",
+       mode: "0600"}
+
+- name: Make sure InfluxDB Conf dir exists
+  become: true
+  file:
+    path: "{{ influxdb_config | dirname }}"
+    state: directory
+    recurse: yes
+
+- name: Write InfluxDB Conf
+  become: true
+  template:
+    src: "influxdb.conf"
+    dest: "{{ influxdb_config }}"
+
+- name: Write InfluxDB Env file
+  become: true
+  template:
+    src: "env"
+    dest: "/etc/influxdb/env"
+
+- name: Initialize InfluxDB
+  become: true
+  command: "/usr/bin/podman run --env-file /etc/influxdb/env -v /var/lib/influxdb:/var/lib/influxdb:Z influxdb:{{influxdb_image_tag}} /init-influxdb.sh"
+  args:
+    creates: /var/lib/influxdb/data
+
+- name: Start influxdb
+  become: true
+  systemd:
+    name: "{{ influxdb_systemd_service_name }}"
+    enabled: true
+    state: "started"
+    daemon_reload: true
+
+- name: Enable Firewall port 8086
+  become: true
+  firewalld:
+    port: 8086/tcp
+    state: enabled
+    permanent: yes
+    immediate: yes
+
+- include_tasks: apimon_db.yaml
+

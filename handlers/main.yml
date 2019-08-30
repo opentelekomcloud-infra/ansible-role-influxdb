@@ -1,0 +1,18 @@
+---
+# handlers file for roles/influxdb
+
+- name: reload systemctl
+  systemd:
+    daemon_reload: true
+
+- name: start enable service
+  systemd:
+    name: "{{ service_name }}"
+    state: "started"
+    enabled: true
+
+- name: restart service
+  systemd:
+    name: "{{ service_name }}"
+    state: "restarted"
+

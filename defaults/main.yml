@@ -1,0 +1,42 @@
+---
+# defaults file for roles/influxdb
+
+influxdb_systemd_service_name: influxdb-service.service
+influxdb_systemd_unit_path: "{{ '/etc/systemd/system/' + influxdb_systemd_service_name }}"
+influxdb_admin_username: admin
+influxdb_admin_password: s3cr3t
+influxdb_hostname: localhost
+influxdb_config: /etc/influxdb/influxdb.conf
+
+influxdb_apimon_db_name: apimon 
+influxdb_telegraf_username: telegraf
+influxdb_telegraf_password: telegraf_pwd
+influxdb_grafana_username: grafana
+influxdb_grafana_password: grafana_pwd
+
+influxdb_ssl_cert_name: influxdb.pem
+influxdb_ssl_cert_location: /etc/ssl/influxdb.pem
+influxdb_ssl_cert_content: |
+  some_fake
+influxdb_conf_location: /etc/influxdb/influxdb.conf
+influxdb_ssl_key_name: influxdb.key
+influxdb_ssl_key_content: |
+  some_fake_key
+
+# Infra defaults
+influxdb_host_state: "present"
+influxdb_host_image: "Standard_Fedora_29_latest"
+influxdb_host_flavor: "s2.xlarge.2"
+influxdb_host_name: "{{ ('grafana.' + domain_name) | default('grafana') }}"
+influxdb_host_availability_zone: "eu-de-03"
+influxdb_host_root_volume_size: 12
+influxdb_host_data_volume_name: "influxdb_data"
+influxdb_host_data_volume_size: 50
+influxdb_host_data_volume_type: "SSD"
+# Auto attach FIP
+influxdb_host_auto_ip: false
+
+influxdb_host_metadata:
+  host-type: influxdb
+influxdb_host_data_volume_metadata:
+  host-type: influxdb

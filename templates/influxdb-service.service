@@ -1,0 +1,31 @@
+[Unit]
+Description=Influx Podman container
+Wants=syslog.service
+
+[Service]
+Type=simple
+Restart=always
+TimeoutSec=30s
+EnvironmentFile=/etc/influxdb/env
+
+ExecStartPre=-/usr/bin/podman rm "influxdb"
+ExecStartPre=-/usr/bin/podman system migrate
+
+ExecStart=/usr/bin/podman run \
+  --name "influxdb" \
+  -p 8086:8086 \
+  -p 2003:2003 \
+  --env-file /etc/influxdb/env \
+  -v /var/lib/influxdb:/var/lib/influxdb:Z \
+  -v /etc/ssl/{{influxdb_ssl_cert_name}}:/etc/ssl/influxdb.crt:Z \
+  -v /etc/ssl/{{influxdb_ssl_key_name}}:/etc/ssl/influxdb.key:Z \
+  ${INFLUXDB_IMAGE}
+
+ExecReload=-/usr/bin/podman stop "influxdb"
+ExecReload=-/usr/bin/podman rm "influxdb"
+
+ExecStop=-/usr/bin/podman stop "influxdb"
+ExecStop=-/usr/bin/podman rm "influxdb"
+
+[Install]
+WantedBy=multi-user.target

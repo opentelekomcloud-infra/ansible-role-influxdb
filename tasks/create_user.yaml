@@ -1,0 +1,10 @@
+# Create InfluxDB user
+
+- name: Create an admin user on a remote host using custom login credentials
+  influxdb_user:
+    user_name: john
+    user_password: s3cr3t
+    admin: yes
+    hostname: "{{ db_hostname }}"
+    login_username: "{{ admin_username }}"
+    login_password: "{{ admin_password }}"
