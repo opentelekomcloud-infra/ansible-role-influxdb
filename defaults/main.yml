@@ -1,27 +1,31 @@
 ---
 # defaults file for roles/influxdb
+#
+ansible_python_interpreter: "/usr/bin/env python3"
 
+influxdb_image_tag: 1.7.8
 influxdb_systemd_service_name: influxdb-service.service
 influxdb_systemd_unit_path: "{{ '/etc/systemd/system/' + influxdb_systemd_service_name }}"
-influxdb_admin_username: admin
-influxdb_admin_password: s3cr3t
+influxdb_admin_user_name: admin
+influxdb_admin_user_password: s3cr3t
 influxdb_hostname: localhost
 influxdb_config: /etc/influxdb/influxdb.conf
 
-influxdb_apimon_db_name: apimon 
-influxdb_telegraf_username: telegraf
-influxdb_telegraf_password: telegraf_pwd
-influxdb_grafana_username: grafana
-influxdb_grafana_password: grafana_pwd
+influxdb_db_name: default 
+influxdb_user_admin: no
 
+influxdb_enable_ssl: false
 influxdb_ssl_cert_name: influxdb.pem
-influxdb_ssl_cert_location: /etc/ssl/influxdb.pem
-influxdb_ssl_cert_content: |
-  some_fake
-influxdb_conf_location: /etc/influxdb/influxdb.conf
-influxdb_ssl_key_name: influxdb.key
-influxdb_ssl_key_content: |
-  some_fake_key
+influxdb_ssl_cert_location: "/etc/ssl/certs/{{ influxdb_ssl_cert_name }}"
+influxdb_ssl_cert_content:
+influxdb_ssl_key_name: influxdb.key.pem
+influxdb_ssl_key_location: "/etc/ssl/certs/{{ influxdb_ssl_key_name }}"
+influxdb_ssl_key_content:
+influxdb_ssl_validate_cert: no
+
+# Please pass shared_secret to avoid it's eventual overriding
+# influxdb_shared_secret: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
+influxdb_shared_secret: abcosdWEFvw32t5
 
 # Infra defaults
 influxdb_host_state: "present"

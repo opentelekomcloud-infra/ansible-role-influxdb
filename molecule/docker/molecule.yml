@@ -1,0 +1,29 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  - name: fedora30-docker
+    image: fedora:30
+    privileged: true
+    volumes:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+    command: "/usr/sbin/init"
+    tty: true
+    environment:
+      container: docker
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    prepare: prepare.yml
+    converge: ../playbook.yml
+verifier:
+  name: testinfra
+  directory: ../tests
+  lint:
+    name: flake8

@@ -1,73 +1,105 @@
 ---
 # tasks file for roles/influxdb
-# TODO(gtema) think about running influx container as influx user similar
-# to Grafana
 
-- name: Install python-influxdb package
+- name: Include Fedora variables
+  include_vars: fedora.yml
+  when: ansible_distribution == "Fedora"
+
+- name: Install required packages
   become: true
   package:
-    name: python3-influxdb
+    state: present
+    name: "{{ item }}"
+  with_items: "{{ packages }}"
+  register: task_result
+  until: task_result is success
+  retries: 5
+
+- name: Create InfluxDB group
+  become: true
+  group:
+    name: influx
     state: present
 
-- name: Write influxdb systemd unit file
+- name: Create InfluxDB user
   become: true
-  template:
-    dest: "{{ influxdb_systemd_unit_path }}"
-    src: influxdb-service.service
+  user:
+    name: influx
+    group: influx
+  register:
+    influx_user
+
+# We need to save grafana user uid, since it is referred
+# in the systemd unit file.
+- name: extract user id
+  set_fact:
+    influx_user_id: "{{ influx_user.uid }}"
 
 - name: Write SSL Cert
   become: true
   copy:
     content: "{{ item.content }}"
-    dest: "{{ ( '/etc/ssl/' + item.name ) }}"
+    dest: "{{ item.location }}"
     mode: "{{ item.mode }}"
+    owner: influx
+    group: influx
+  when: influxdb_enable_ssl and item.content
   loop:
     - {content: "{{ influxdb_ssl_cert_content }}",
-       name: "{{ influxdb_ssl_cert_name }}",
-       mode: "0644"}
+       location: "{{ influxdb_ssl_cert_location }}",
+       mode: '0644'}
     - {content: "{{ influxdb_ssl_key_content }}",
-       name: "{{ influxdb_ssl_key_name }}",
-       mode: "0600"}
+       location: "{{ influxdb_ssl_key_location }}",
+       mode: '0600'}
 
-- name: Make sure InfluxDB Conf dir exists
+- name: Create influx directory
   become: true
   file:
-    path: "{{ influxdb_config | dirname }}"
+    path: "{{ item }}"
     state: directory
-    recurse: yes
-
-- name: Write InfluxDB Conf
-  become: true
-  template:
-    src: "influxdb.conf"
-    dest: "{{ influxdb_config }}"
+    owner: influx
+    group: influx
+  loop:
+    - /etc/influxdb
+    - /var/lib/influxdb
 
 - name: Write InfluxDB Env file
   become: true
   template:
     src: "env"
     dest: "/etc/influxdb/env"
+    owner: influx
+    group: influx
 
 - name: Initialize InfluxDB
   become: true
-  command: "/usr/bin/podman run --env-file /etc/influxdb/env -v /var/lib/influxdb:/var/lib/influxdb:Z influxdb:{{ influxdb_image_tag }} /init-influxdb.sh"
+  become_user: influx
+  command: >
+    /usr/bin/podman run --env-file /etc/influxdb/env
+    -v /var/lib/influxdb:/var/lib/influxdb:Z
+    influxdb:{{ influxdb_image_tag }} /init-influxdb.sh
   args:
     creates: /var/lib/influxdb/data
-
-- name: Start influxdb
-  become: true
-  systemd:
-    name: "{{ influxdb_systemd_service_name }}"
-    enabled: true
-    state: "started"
-    daemon_reload: true
 
 - name: Enable Firewall port 8086
   become: true
   firewalld:
     port: 8086/tcp
     state: enabled
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
+  notify:
+    - enable firewalld
+
+- name: Write influxdb systemd unit file
+  become: true
+  template:
+    dest: "{{ influxdb_systemd_unit_path }}"
+    src: "{{ influxdb_systemd_service_name }}"
+  notify:
+    - restart influxdb
+
+# Force handler before trying to create DB
+- meta: flush_handlers
 
 - include_tasks: db.yaml

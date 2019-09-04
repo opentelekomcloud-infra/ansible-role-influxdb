@@ -6,10 +6,12 @@ Wants=syslog.service
 Type=simple
 Restart=always
 TimeoutSec=30s
+User=influx
+Group=influx
 EnvironmentFile=/etc/influxdb/env
 
-ExecStartPre=-/usr/bin/podman rm "influxdb"
 ExecStartPre=-/usr/bin/podman system migrate
+ExecStartPre=-/usr/bin/podman rm "influxdb"
 
 ExecStart=/usr/bin/podman run \
   --name "influxdb" \
@@ -17,8 +19,10 @@ ExecStart=/usr/bin/podman run \
   -p 2003:2003 \
   --env-file /etc/influxdb/env \
   -v /var/lib/influxdb:/var/lib/influxdb:Z \
-  -v /etc/ssl/{{influxdb_ssl_cert_name}}:/etc/ssl/influxdb.crt:Z \
-  -v /etc/ssl/{{influxdb_ssl_key_name}}:/etc/ssl/influxdb.key:Z \
+{% if influxdb_enable_ssl %}
+  -v {{ influxdb_ssl_cert_location }}:/etc/ssl/influxdb.pem:Z \
+  -v {{ influxdb_ssl_key_location }}:/etc/ssl/influxdb.key.pem:Z \
+{% endif %}
   ${INFLUXDB_IMAGE}
 
 ExecReload=-/usr/bin/podman stop "influxdb"

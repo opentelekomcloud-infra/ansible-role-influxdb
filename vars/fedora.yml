@@ -1,0 +1,6 @@
+---
+packages:
+  - libselinux-python
+  - podman
+  - python3-influxdb
+  - firewalld

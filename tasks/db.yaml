@@ -7,10 +7,8 @@
     hostname: "{{ influxdb_hostname }}"
     username: "{{ influxdb_admin_user_name }}"
     password: "{{ influxdb_admin_user_password }}"
-    database_name: "{{ influxdb_apimon_db_name }}"
-    ssl: yes
+    database_name: "{{ influxdb_db_name }}"
+    ssl: "{{ influxdb_enable_ssl }}"
     retries: 0
-    validate_certs: no
-    # "{{ apimon_ssl_validate_cert }}" 
-
+    validate_certs: "{{ influxdb_ssl_validate_cert }}"
     state: present

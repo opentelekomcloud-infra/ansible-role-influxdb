@@ -2,9 +2,12 @@
 
 - name: Create an admin user on a remote host using custom login credentials
   influxdb_user:
-    user_name: john
-    user_password: s3cr3t
-    admin: yes
-    hostname: "{{ db_hostname }}"
-    login_username: "{{ admin_username }}"
-    login_password: "{{ admin_password }}"
+    hostname: "{{ influxdb_hostname }}"
+    login_username: "{{ influxdb_admin_user_name }}"
+    login_password: "{{ influxdb_admin_user_password }}"
+    ssl: "{{ influxdb_enable_ssl }}"
+    retries: 0
+    validate_certs: "{{ influxdb_ssl_validate_cert }}"
+    user_name: "{{ influxdb_user_name }}"
+    user_password: "{{ influxdb_user_password }}"
+    admin: "{{ influxdb_user_admin }}"

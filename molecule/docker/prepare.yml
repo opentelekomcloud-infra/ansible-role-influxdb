@@ -1,0 +1,22 @@
+---
+
+- name: Prepare container env
+  hosts: all
+  tasks:
+    - name: install podman
+      become: yes
+      package:
+        name: podman
+        state: installed
+
+    - name: modify /etc/containers/storage - graphroot
+      replace:
+        path: /etc/containers/storage.conf
+        regexp: "^graphroot.*$"
+        replace: "graphroot=\"/tmp/containers\""
+
+    - name: modify /etc/containers/storage - mountopts
+      replace:
+        path: /etc/containers/storage.conf
+        regexp: "^mountopt.*$"
+        replace: "mountopt=\"nodev\""

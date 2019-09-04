@@ -1,17 +1,17 @@
 ---
 # handlers file for roles/influxdb
 
-- name: reload systemctl
+- name: restart influxdb
+  become: true
   systemd:
-    daemon_reload: true
+    name: "{{ influxdb_systemd_service_name }}"
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
 
-- name: start enable service
+- name: enable firewalld
+  become: true
   systemd:
-    name: "{{ service_name }}"
-    state: "started"
-    enabled: true
-
-- name: restart service
-  systemd:
-    name: "{{ service_name }}"
-    state: "restarted"
+    name: firewalld
+    enabled: yes
+    state: started
