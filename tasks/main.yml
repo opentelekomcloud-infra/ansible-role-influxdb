@@ -15,17 +15,17 @@
   until: task_result is success
   retries: 5
 
-- name: Create InfluxDB group
+- name: Create InfluxDB OS group
   become: true
   group:
-    name: influx
+    name: "{{ influxdb_os_group }}"
     state: present
 
-- name: Create InfluxDB user
+- name: Create InfluxDB OS user
   become: true
   user:
-    name: influx
-    group: influx
+    name: "{{ influxdb_os_user }}"
+    group: "{{ influxdb_os_group }}"
   register:
     influx_user
 
@@ -41,8 +41,8 @@
     content: "{{ item.content }}"
     dest: "{{ item.location }}"
     mode: "{{ item.mode }}"
-    owner: influx
-    group: influx
+    owner: "{{ influxdb_os_user }}"
+    group: "{{ influxdb_os_group }}"
   when: influxdb_enable_ssl and item.content
   loop:
     - {content: "{{ influxdb_ssl_cert_content }}",
@@ -57,8 +57,8 @@
   file:
     path: "{{ item }}"
     state: directory
-    owner: influx
-    group: influx
+    owner: "{{ influxdb_os_user }}"
+    group: "{{ influxdb_os_group }}"
   loop:
     - /etc/influxdb
     - /var/lib/influxdb
@@ -68,28 +68,18 @@
   template:
     src: "env"
     dest: "/etc/influxdb/env"
-    owner: influx
-    group: influx
+    owner: "{{ influxdb_os_user }}"
+    group: "{{ influxdb_os_group }}"
 
 - name: Initialize InfluxDB
   become: true
-  become_user: influx
+  become_user: "{{ influxdb_os_user }}"
   command: >
     /usr/bin/podman run --env-file /etc/influxdb/env
     -v /var/lib/influxdb:/var/lib/influxdb:Z
     influxdb:{{ influxdb_image_tag }} /init-influxdb.sh
   args:
     creates: /var/lib/influxdb/data
-
-- name: Enable Firewall port 8086
-  become: true
-  firewalld:
-    port: 8086/tcp
-    state: enabled
-    permanent: true
-    immediate: true
-  notify:
-    - enable firewalld
 
 - name: Write influxdb systemd unit file
   become: true
@@ -98,6 +88,8 @@
     src: "{{ influxdb_systemd_service_name }}"
   notify:
     - restart influxdb
+
+- include_tasks: firewall.yml
 
 # Force handler before trying to create DB
 - meta: flush_handlers

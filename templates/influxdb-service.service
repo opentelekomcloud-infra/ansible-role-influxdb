@@ -6,8 +6,8 @@ Wants=syslog.service
 Type=simple
 Restart=always
 TimeoutSec=30s
-User=influx
-Group=influx
+User={{ influxdb_os_user }}
+Group={{ influxdb_os_group }}
 EnvironmentFile=/etc/influxdb/env
 
 ExecStartPre=-/usr/bin/podman system migrate
@@ -16,7 +16,6 @@ ExecStartPre=-/usr/bin/podman rm "influxdb"
 ExecStart=/usr/bin/podman run \
   --name "influxdb" \
   -p 8086:8086 \
-  -p 2003:2003 \
   --env-file /etc/influxdb/env \
   -v /var/lib/influxdb:/var/lib/influxdb:Z \
 {% if influxdb_enable_ssl %}

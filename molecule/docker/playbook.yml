@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    influxdb_os_user: root
+    influxdb_os_group: root
+  roles:
+    - role: ansible-role-influxdb

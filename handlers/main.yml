@@ -8,10 +8,3 @@
     state: restarted
     enabled: yes
     daemon_reload: yes
-
-- name: enable firewalld
-  become: true
-  systemd:
-    name: firewalld
-    enabled: yes
-    state: started
