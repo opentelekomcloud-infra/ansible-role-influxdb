@@ -1,4 +1,5 @@
 import os
+import requests
 import pytest
 
 import testinfra.utils.ansible_runner
@@ -64,3 +65,12 @@ def test_influxdb_running(host, srv):
 
     assert service.is_running
     assert service.is_enabled
+
+
+def test_influx_operating(host):
+    curl = host.ansible('uri', 'url=http://localhost:8086/metrics',
+                        check=False)
+    assert(curl['status'] == 200)
+
+    r = host.socket('tcp://0.0.0.0:8086')
+    assert(r.is_listening)
