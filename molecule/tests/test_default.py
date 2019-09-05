@@ -9,6 +9,15 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 ).get_hosts('all')
 
 
+@pytest.fixture(scope='module')
+def influx_user(host):
+    ansible_vars = host.ansible.get_variables()
+    user = ansible_vars.get('influxdb_os_user', 'influx')
+    group = ansible_vars.get('influxdb_os_group', 'influx')
+
+    return {'user': user, 'group': group}
+
+
 @pytest.mark.parametrize('pkg', [
     'podman',
     'python3-influxdb',
@@ -28,20 +37,22 @@ def test_influxdb_systemd_config(host):
     assert data.group == 'root'
 
 
-def test_influxdb_user(host):
-    user = host.user('influx')
+def test_influxdb_user(host, influx_user):
 
-    assert user.group == 'influx'
+    user = host.user(influx_user['user'])
+
+    assert user.group == influx_user['group']
 
 
-def test_influxdb_config(host):
+def test_influxdb_config(host, influx_user):
+
     for fname in ['/etc/influxdb',
                   '/etc/influxdb/env']:
         data = host.file(fname)
 
         assert data.exists
-        assert data.user == 'influx'
-        assert data.group == 'influx'
+        assert data.user == influx_user['user']
+        assert data.group == influx_user['group']
 
 
 @pytest.mark.parametrize('srv', [
