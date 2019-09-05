@@ -1,5 +1,4 @@
 import os
-import requests
 import pytest
 
 import testinfra.utils.ansible_runner
