@@ -10,4 +10,6 @@
     validate_certs: "{{ influxdb_ssl_validate_cert }}"
     user_name: "{{ influxdb_user_name }}"
     user_password: "{{ influxdb_user_password }}"
-    admin: "{{ influxdb_user_admin }}"
+    grants:
+      "{{ influxdb_user_grants | default(omit) }}"
+    admin: "{{ influxdb_user_admin | default('no') }}"
