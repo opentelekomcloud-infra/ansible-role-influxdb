@@ -40,17 +40,28 @@
   copy:
     content: "{{ item.content }}"
     dest: "{{ item.location }}"
-    mode: "{{ item.mode }}"
-    owner: "{{ influxdb_os_user }}"
-    group: "{{ influxdb_os_group }}"
   when: influxdb_enable_ssl and item.content
   loop:
     - {content: "{{ influxdb_ssl_cert_content }}",
-       location: "{{ influxdb_ssl_cert_location }}",
-       mode: '0644'}
+       location: "{{ influxdb_ssl_cert_location }}"}
     - {content: "{{ influxdb_ssl_key_content }}",
-       location: "{{ influxdb_ssl_key_location }}",
+       location: "{{ influxdb_ssl_key_location }}"}
+
+- name: Set ssl cert permission
+  become: true
+  file:
+    path: "{{ item.location }}"
+    owner: "{{ influxdb_os_user }}"
+    group: "{{ influxdb_os_group }}"
+    mode: "{{ item.mode }}"
+  when: influxdb_enable_ssl
+  loop:
+    - {location: "{{ influxdb_ssl_cert_location }}",
+       mode: '0644'}
+    - {location: "{{ influxdb_ssl_key_location }}",
        mode: '0600'}
+
+
 
 - name: Create influx directory
   become: true
