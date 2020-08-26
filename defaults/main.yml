@@ -34,7 +34,7 @@ influxdb_shared_secret: abcosdWEFvw32t5
 influxdb_host_state: "present"
 influxdb_host_image: "Standard_Fedora_30_latest"
 influxdb_host_flavor: "s2.xlarge.2"
-influxdb_host_name: "{{ ('grafana.' + domain_name) | default('grafana') }}"
+influxdb_host_server_name: "{{ ('grafana.' + domain_name) | default('grafana') }}"
 influxdb_host_availability_zone: "eu-de-03"
 influxdb_host_root_volume_size: 12
 influxdb_host_data_volume_name: "influxdb_data"
