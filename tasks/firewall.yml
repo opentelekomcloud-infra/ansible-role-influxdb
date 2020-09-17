@@ -16,3 +16,11 @@
     state: enabled
     permanent: true
     immediate: true
+
+- name: Enable Firewall port 80 for certbot
+  become: true
+  firewalld:
+    port: 80/tcp
+    state: enabled
+    permanent: true
+    immediate: true
