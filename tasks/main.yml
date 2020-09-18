@@ -5,6 +5,10 @@
   include_vars: fedora.yml
   when: ansible_distribution == "Fedora"
 
+- name: Include Centos variables
+  include_vars: centos.yml
+  when: ansible_distribution == "CentOS"
+
 - name: Install required packages
   become: true
   package:
